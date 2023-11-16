@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import bcrypt from 'bcrypt';
 // import 'dotenv/config';
 import { generateToken, sanitizeUser } from "../config/utils.js";
+import passport from "passport";
 
 
 export const register = async (req, res) => {
@@ -63,42 +64,31 @@ export const register = async (req, res) => {
     }
 };
 
-export const login = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        if (!password || !email) {
-            return res.status(401).json({ message: 'Email and password are required !' })
+export const login = (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        if (err) {
+            return next(err);
         }
-
-        // Find the user by email
-        const user = await User.findOne({ email });
         if (!user) {
             // NOTE: 401 : Unauthorized
-            return res.status(401).json({ messsage: 'Invalid credentials' });
-            // return res.status(401).json({ messsage: 'Invalid credentials', details: 'User dont exist' });
+            return res.status(401).json({ message: info.message });
         }
+        // If authentication is successful, manually log in the user
+        req.login(user, (err) => {
+            if (err) {
+                // NOTE - 500 : Internal server error 
+                return res.status(500).json({ message: 'Internal Server Error' });
+            }
 
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        if (!passwordMatch) {
-            // NOTE: 401 : Unauthorized
-            return res.status(401).json({ message: 'Invalid credentials' });
-            // return res.status(401).json({ message: 'Invalid credentials', details: 'password is incorrect' });
-        }
-
-        // if the credentials are valid , generate the JWT token
-        const token = generateToken(user);
-
-        //Return the token to the client
-        res.status(200).json({ token });
-    } catch (error) {
-        console.log('Error during login:', error);
-        if (error instanceof mongoose.Error.CastError) {
-            return res.status(400).json({ message: 'Invalid user ID format' });
-        } else {
-            res.status(500).json({ message: 'Internal Server Error' })
-        }
-    }
+            const token = generateToken(user);
+            // Send a success response with user data or a token
+            return res.status(200).json({ message: 'Authentication successful', user, token });
+        });
+        // generate Token
+        // return res.status(200).json({ token });
+    })(req, res, next)
 }
+
 
 
 export const logout = async (req, res) => {

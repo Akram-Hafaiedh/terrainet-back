@@ -1,10 +1,10 @@
 import passport from "passport";
-import User from "../models/User";
+import User from "../models/User.js";
 import bcrypt from 'bcrypt';
 import { Strategy as LocalStrategy } from "passport-local";
 
 passport.use(
-    new LocalStrategy({ usenameField: 'email', passwordField: 'password' }, async (email, password, done) => {
+    new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, async (email, password, done) => {
         try {
             const user = await User.findOne({ email });
             if (!user) {
