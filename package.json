@@ -9,8 +9,8 @@
     "migrate": "migrate-mongo",
     "migrate:init": "migrate-mongo init",
     "migrate:create": "migrate-mongo create",
-    "migrate:up": "migrate-mongo status && migrate-mongo up",
-    "migrate:down": "migrate-mongo status && migrate-mongo down",
+    "migrate:up": "migrate-mongo status && migrate-mongo up && migrate-mongo status",
+    "migrate:down": "migrate-mongo status && migrate-mongo down && migrate-mongo status",
     "migrate:status": "migrate-mongo status",
     "start": "node src/app.js",
     "dev": "nodemon src/app.js"

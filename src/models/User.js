@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema({
-    email: { type: String, unique: true, required: true },
+    email: { type: String, unique: true, required: true, match: [/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/, 'Invalid email format'], },
     username: { type: String, required: true },
     password: { type: String, required: true },
     profileId: { type: mongoose.Schema.Types.ObjectId, ref: 'Profile' }, // Reference to Profile, One-to-One

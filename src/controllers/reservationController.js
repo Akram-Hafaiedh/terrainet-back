@@ -1,6 +1,6 @@
 
 import { calculateEndTime } from '../config/utils.js';
-import { Place, Reservation } from '../models/Place.js'
+import Reservation from '../models/Reservation.js'
 import User from '../models/User.js';
 
 // create a reservations

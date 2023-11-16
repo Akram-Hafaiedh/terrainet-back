@@ -1,11 +1,33 @@
-import { Place, Reservation } from "../models/Place.js";
+import Location from "../models/Location.js";
+import Place from "../models/Place.js";
 
 // Create a new Place
 export const createPlace = async (req, res) => {
     try {
-        const newPlace = new Place(req.body);
-        await newPlace.save();
-        res.status(201).json(newPlace);
+        const { longitude, laptitude } = req.body.location;
+        if (!req.body.location) {
+            return res.status(400).json({ message: 'missing location data' });
+        } else if (!laptitude || !longitude) {
+            return res.status(400).json({ message: 'Invalid location data' });
+        }
+        const existingPlace = await Place.findOne({ name: req.body.name });
+        if (existingPlace) {
+            return res.status(400).json({ message: 'Place with the same name already exists' });
+        }
+        const existingLocation = await Location.findOne({ coordinates: [longitude, laptitude] })
+        if (existingLocation) {
+            return res.status(400).json({ message: 'Place with the same location already exists' });
+        }
+        console.log("🚀 ~ file: placeController.js:7 ~ createPlace ~ longitude, laptitude:", longitude, laptitude)
+        let newPlace = new Place(req.body);
+        const newLocation = new Location({
+            type: 'Point',
+            coordinates: [longitude, laptitude]
+        })
+        await newLocation.save();
+        newPlace.location = newLocation._id;
+        const modifiedPlace = await newPlace.save();
+        res.status(201).json(modifiedPlace);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

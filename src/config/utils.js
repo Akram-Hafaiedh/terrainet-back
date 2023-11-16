@@ -1,3 +1,9 @@
+import jwt from 'jsonwebtoken';
+import 'dotenv/config';
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+
+
+
 export const sanitizeUser = (user) => {
     const { _id, password, createdAt, updatedAt, __v, ...sanitizedUser } = user.toObject();
     return { id: _id, ...sanitizedUser };
@@ -29,3 +35,16 @@ export const convertToTime = (...args) => {
         throw new Error('Invalid number of arguments for convertToTime function');
     }
 };
+
+
+export const generateToken = (user) => {
+    const payload = {
+        user: {
+            id: user._id,
+            email: user.email,
+            username: user.username
+        }
+    }
+    const token = jwt.sign({ payload }, JWT_SECRET_KEY, { expiresIn: '6h' });
+    return token;
+}
