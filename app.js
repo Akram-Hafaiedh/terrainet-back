@@ -9,7 +9,7 @@ import authRouter from './src/routes/authRoutes.js';
 import reservationRouter from './src/routes/reservationRoutes.js'
 
 import passport from './src/config/passport.js';
-import session from 'express-session';
+import morgan from 'morgan';
 
 
 const PORT = process.env.PORT || 3001
@@ -17,15 +17,9 @@ const PORT = process.env.PORT || 3001
 const app = express()
 
 // Middleware
+app.use(morgan('combined'))
 app.use(express.json());
-app.use(session({
-    secret: 'Dexter Morgan',
-    resave: false,
-    saveUninitialized: false,
-    // cookie: { secure: true },
-}))
 app.use(passport.initialize());
-app.use(passport.session());
 
 // Connect to the database
 mongoose.connect(process.env.MONGODB_URI)

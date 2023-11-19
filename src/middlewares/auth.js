@@ -1,5 +1,6 @@
 export const checkUserRole = (allowRoles) => (req, res, next) => {
-    const { roles } = req.user //Assuming user information is attached to the request
+    //Assuming user information is attached to the request
+    const { roles } = req.user
     if (roles.some((role) => allowRoles.includes(role))) {
         // User has the required role
         return next()
@@ -57,3 +58,13 @@ export const isAuthorized = (requiredRoles) => (req, res, next) => {
         return res.status(403).json({ message: 'Forbidden' })
     }
 }
+
+// Middleware to check if a user is authenticated
+export const ensureAuthenticated = (req, res, next) => {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/login');
+};
+
+
