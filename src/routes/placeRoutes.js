@@ -1,12 +1,20 @@
 import express from 'express';
-import { createPlace, deletePlaceById, getPlaceById, getPlaces, updatePlaceById } from '../controllers/placeController.js';
+import { placeController } from '../controllers/placeController.js';
+import placeReservationController from './placeReservationRoutes.js'
 
 const router = express.Router();
+// Place management
 
-router.post('/', createPlace);
-router.get('/', getPlaces);
-router.get('/:id', getPlaceById);
-router.put('/:id', updatePlaceById);
-router.delete('/:id', deletePlaceById);
+router.get('/type/:type', placeController.getPlacesByType)
+router.get('/types', placeController.getAllPlaceTypes);
+
+router.post('/', placeController.createPlace);
+router.get('/', placeController.getAllPlaces);
+router.get('/:placeId', placeController.getPlaceById);
+router.put('/:placeId', placeController.updatePlaceById);
+router.delete('/:placeId', placeController.deletePlaceById);
+
+// Include user reservation routes for a specific place
+router.use('/:placeId/reservations', placeReservationController)
 
 export default router;

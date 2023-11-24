@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
     picture: { type: String },
     profileId: { type: mongoose.Schema.Types.ObjectId, ref: 'Profile' }, // Reference to Profile, One-to-One
     reservations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reservation' }], // Array of Reservation Reference: One-To-Many
-    roles: { type: [String], enum: ['user', 'admin', 'moderator'], default: ['user'] },
+    roles: { type: [String], enum: ['user', 'admin', 'moderator', 'guest'], default: ['user'] },
 }, { timestamps: true });
 
 // Create a unique index on the email field

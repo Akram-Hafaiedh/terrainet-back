@@ -10,7 +10,7 @@ const placeSchema = new mongoose.Schema({
     //     laptitude: { type: Number, required: true },
     //     longitude: { type: Number, required: true },
     // },
-    resrvations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reservation' }]
+    reservations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reservation' }]
 
     // oteher fields
 }, { timestamps: true })

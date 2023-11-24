@@ -29,7 +29,7 @@ export const profileController = {
     // get one profile by id
     async getProfileById(req, res) {
         try {
-            const place = await Profile.findById(req.params.id);
+            const place = await Profile.findById(req.params.profileId);
             //NOTE - 200 : OK
             //NOTE - methods: [GET,PUT,POST,HEAD, TRACE]
             res.status(200).json(place);
@@ -42,7 +42,11 @@ export const profileController = {
     // update a profile by id
     async updateProfileById(req, res) {
         try {
-            const updatedProfile = await Profile.findByIdAndUpdate(req.params.id, req.body, { new: true })
+            const updatedProfile = await Profile.findByIdAndUpdate(
+                req.params.id, 
+                req.body,
+                { new: true }
+            )
             //NOTE - 200 : OK
             //NOTE - methods: [GET,PUT,POST,HEAD, TRACE]
             res.status(200).json(updatedProfile);

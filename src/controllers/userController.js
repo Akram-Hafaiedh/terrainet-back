@@ -30,6 +30,44 @@ export const userController = {
             }
         }
     },
+    // create multiple users
+    async createMultipleusers(req, res) {
+        try {
+            const usersData = req.body;
+
+            if (
+                !usersData ||
+                !Array.isArray(usersData) ||
+                usersData.length === 0
+            ) {
+                return res.status(400).json({ message: 'Invalid or empty users data' });
+            }
+            // Validate each user object
+            for (const user of usersData) {
+                console.log(user);
+                if (
+                    !user.username ||
+                    !user.password ||
+                    !user.email
+                    // more validation if needed
+                ) {
+                    // NOTE - 400 : Bad request
+                    return res.status(400).json({ message: 'Invalid user data. All fields are required' });
+                }
+                const isEmailUnique = await User.findOne({ email: user.email });
+                if (isEmailUnique) {
+                    return res.status(400).json({ message: `Email address '${user.email}' must be unique` });
+                }
+            }
+            const createdUsers = await User.create(usersData);
+            // sanitize user data before sending it in the response
+            const sanitizedUsers = createdUsers.map(user => sanitizeUser(user));
+            res.status(201).json(sanitizedUsers)
+        } catch (error) {
+            // Handle other errors
+            res.status(400).json({ message: error.message });
+        }
+    },
     //Get all users
     async getUsers(req, res) {
         try {
@@ -42,7 +80,7 @@ export const userController = {
     // get a specific user by Id
     async getUserById(req, res) {
         try {
-            const user = await User.findById(req.params.id);
+            const user = await User.findById(req.params.userId);
             res.status(200).json(user);
         } catch (error) {
             // res.status(404).json({ message: error.message })
@@ -52,11 +90,31 @@ export const userController = {
     // update a user by Id
     async updateUserById(req, res) {
         try {
-            const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+            const userId = req.params.userId;
+            const newUserData = req.body;
+            const currentUser = await User.findById(userId);
+            // check if updated email is the same as the current email
+            if (currentUser.email === newUserData.email) {
+                return res.status(400).json({ message: 'The new email is the same as the current email.' });
+            }
+            // check if the new email is already used by another user
+            const existingUserWithNewEmail = await User.findOne({ email: newUserData.email, _id: { $ne: userId } })
+            if (existingUserWithNewEmail) {
+                return res.status(400).json({ message: 'Email address is already in used by another user' });
+            }
+            // Update the user
+            const updatedUser = await User.findByIdAndUpdate(
+                req.params.userId,
+                req.body,
+                { new: true }
+            );
+            if (!updatedUser) {
+                return res.status(404).json({ message: 'User not found' });
+            }
             res.status(200).json(updatedUser);
         } catch (error) {
             // res.status(404).json({ message: error.message })
-            res.status(404).json({ message: 'User not found' })
+            res.status(404).json({ message: error.message })
         }
     },
     // Delete a user by ID

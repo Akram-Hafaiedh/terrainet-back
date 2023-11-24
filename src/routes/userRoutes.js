@@ -11,9 +11,11 @@ const router = express.Router();
 // Routes for user management
 router.post('/', userController.createUser);
 router.get('/', userController.getUsers);
-router.get('/:id', userController.getUserById);
-router.put('/:id', userController.updateUserById);
-router.delete('/:id', userController.deleteUserById);
+router.get('/:userId', userController.getUserById);
+router.put('/:userId', userController.updateUserById);
+router.delete('/:userId', userController.deleteUserById);
+
+router.post('/multiple-users',userController.createMultipleusers)
 
 // Routes for reservations
 router.get('/:userId/reservations', userReservationController.getUserReservations)

@@ -1,5 +1,6 @@
 
 import { calculateEndTime } from '../config/utils.js';
+import Place from '../models/Place.js';
 import Reservation from '../models/Reservation.js'
 import User from '../models/User.js';
 
@@ -49,6 +50,13 @@ export const reservationController = {
                 { new: true } // return the updated user document
             );
 
+            // update the place's reservation array
+            await Place.findOneAndUpdate(
+                { _id: placeId },
+                { $push: { reservations: newReservation._id } },
+                { new: true }
+            );
+
             // NOTE - 201 : Created
             res.status(201).json(newReservation);
         } catch (error) {
@@ -57,37 +65,80 @@ export const reservationController = {
             res.status(400).json({ message: error.message })
         }
     },
+    // create multiple reservations
+    async createMultipleReservations(req, res) {
+        try {
+            const reservationsData = req.body;
+            if (!reservationsData || !Array.isArray(reservationsData) || reservationsData.length === 0) {
+                // NOTE - 400 : Bad request
+                return res.status(400).json({ message: 'Invalid or empty reservation data.' })
+            }
+            for (const reservation of reservationsData) {
+                if (
+                    !reservation.userId ||
+                    !reservation.placeId ||
+                    !reservation.date ||
+                    !reservation.startTime ||
+                    !reservation.endTime
+                ) {
+                    // NOTE - 400 : Bad request
+                    return res.status(400).json({ message: 'Invalid reservation data. All fields are required.' })
+                }
+                // You can add more specific validation if needed
+                // For example, check if the date and time formats are valid.
+            }
+            const createdReservations = await Reservation.create(reservationsData);
+            // shortcut for saving one or more documents to the database
+            // does new Model(doc).save() for every doc in docs
+
+            // NOTE - 201: Created
+            res.status(201).json(createdReservations);
+        } catch (error) {
+            // NOTE - 500: Internal Server Error
+            console.log(error);
+            res.status(500).json({ message: error.message })
+        }
+    },
     // get all reservations
-    async getReservations(req, res) {
+    async getAllReservations(req, res) {
         try {
             const reservations = await Reservation.find();
-            // NOTE - 200: OK
-            res.status(200).json(reservations);
+            if (!reservations || reservations.length === 0) {
+                // NOTE - 204 : No content
+                res.status(204).json([]);
+            } else {
+                // NOTE - 200: OK
+                res.status(200).json(reservations);
+            }
         } catch (error) {
             // NOTE - 500 : Internal Server Error
-            res.status().json({ message: error.message });
+            res.status(500).json({ message: error.message });
         }
     },
     // get one reservation by Id
     async getReservationById(req, res) {
         try {
-            const reservation = await Reservation.findById(req.params.id)
+            const reservation = await Reservation.findById(req.params.reservationId)
+            if (!reservation) {
+                // NOTE - 404 : Not Found
+                return res.status(404).json({ message: 'Reservation not found' })
+            
+            }
             // NOTE - 200: OK
             res.status(200).json(reservation)
         } catch (error) {
             // NOTE - 404 : Not found
-            res.status(404).json({ message: 'Reservation not found' });
+            res.status(500).json({ message: error.message });
             // res.status().json({message:error.message});
         }
     },
     // update a reservation by id
     async updateReservationById(req, res) {
-        // console.log(req.body);
         try {
-            const reservationId = req.params.id
+            const reservationId = req.params.reservationId;
             // console.log("🚀 ~ file: reservationController.js:82 ~ updateReservationById ~ req.params:", req.params)
             // console.log("🚀 ~ file: reservationController.js:82 ~ updateReservationById ~ reservationId:", reservationId)
-            const { date, placeId, startTime, userId } = req.body
+            const { date, placeId, startTime, userId } = req.body;
 
             // Calculate the endTime based on the new startTime (assuming duration is 1 hour)
             const endTime = calculateEndTime(startTime, 1);
@@ -149,7 +200,7 @@ export const reservationController = {
     // ,delete a reservation by id
     async deleteReservationById(req, res) {
         try {
-            await Reservation.findByIdAndDelete(req.params.id);
+            await Reservation.findByIdAndDelete(req.params.reservationId);
             // NOTE - 204 : Request Ended
             res.status(204).end()
         } catch (error) {

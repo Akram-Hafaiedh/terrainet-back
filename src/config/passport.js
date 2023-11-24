@@ -116,15 +116,14 @@ passport.use(new FacebookStrategy(
 passport.use(
     new GithubStrategy(
         {
-<<<<<<< HEAD
+
             clientID: FACEBOOK_CLIENT_ID,
             clientSecret: FACEBOOK_CLIENT_SECRET,
             callbackURL: 'http://localhost:4000/auth/facebook/callback',
-=======
+
             clientID: GITHUB_CLIENT_ID,
             clientSecret: GITHUB_CLIENT_SECRET,
             callbackURL: 'http://localhost:4000/auth/github/callback',
->>>>>>> 78b2905 (Remove sensitive information and added githubStrategy config)
             profileFields: ['id', 'displayName', 'emails', 'photos'],
             // scope: [ 'email', 'user_friends' , 'displayName'],
         },
