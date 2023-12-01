@@ -15,9 +15,12 @@ const FACEBOOK_CLIENT_SECRET = process.env.FACEBOOK_CLIENT_SECRET;
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 
-
+// Local strategy
 passport.use(
-    new LocalStrategy({ usernameField: 'email', passwordField: 'password' }, async (email, password, done) => {
+    new LocalStrategy({
+        usernameField: 'email',
+        passwordField: 'password',
+    }, async (email, password, done) => {
         try {
             const user = await User.findOne({ email });
             if (!user) {
@@ -32,9 +35,10 @@ passport.use(
         } catch (error) {
             return done(error);
         }
-    })
+    }
+    )
 );
-// JWT strategy for token-based authentication
+// JWT strategy (for token-based authentication)
 passport.use(new JWTStrategy(
     {
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -61,7 +65,7 @@ passport.use(new GoogleStrategy(
         scope: ['profile', 'email', 'openid'],
         prompt: 'select_account',
     },
-    function (accessToken, refreshToken, profile, done) {
+    (accessToken, refreshToken, profile, done) => {
         // Your Google authentication logic
         // Replace this with your actual user authentication logic
         const user = {
@@ -77,7 +81,7 @@ passport.use(new GoogleStrategy(
             birthday: profile._json.birthday, // User's birthday (if available)
             accessToken,
             refreshToken,
-        }
+        };
         return done(null, user);
     }
 ));
@@ -98,8 +102,7 @@ passport.use(new FacebookStrategy(
         //     return done(err, user);
         // });
         const user = {
-
-            profile,
+            // profile,
             // User ID (unique identifier on Facebook)
             id: profile.id,
             displayName: profile.displayName,       // User's display name
@@ -116,11 +119,6 @@ passport.use(new FacebookStrategy(
 passport.use(
     new GithubStrategy(
         {
-
-            clientID: FACEBOOK_CLIENT_ID,
-            clientSecret: FACEBOOK_CLIENT_SECRET,
-            callbackURL: 'http://localhost:4000/auth/facebook/callback',
-
             clientID: GITHUB_CLIENT_ID,
             clientSecret: GITHUB_CLIENT_SECRET,
             callbackURL: 'http://localhost:4000/auth/github/callback',
@@ -136,7 +134,7 @@ passport.use(
             // });
             const user = {
 
-                profile,
+                // profile,
                 // User ID (unique identifier on Facebook)
                 id: profile.id,
                 displayName: profile.displayName,       // User's display name

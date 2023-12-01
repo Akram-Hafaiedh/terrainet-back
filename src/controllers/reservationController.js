@@ -122,7 +122,7 @@ export const reservationController = {
             if (!reservation) {
                 // NOTE - 404 : Not Found
                 return res.status(404).json({ message: 'Reservation not found' })
-            
+
             }
             // NOTE - 200: OK
             res.status(200).json(reservation)

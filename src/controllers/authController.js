@@ -19,6 +19,7 @@ const generateToken = (user) => {
     const token = jwt.sign({ payload }, JWT_SECRET_KEY, { expiresIn: '6h' });
     return token;
 }
+
 const hanldeOAuthCallback = async (req, res) => {
 
     //TODO - This is gonna be used for authentication (Register - Login)
@@ -60,6 +61,7 @@ const hanldeOAuthCallback = async (req, res) => {
 
 export const authController = {
     async register(req, res) {
+        console.log(req.body);
         try {
             const { email, password, username, passwordConfirmation } = req.body;
             console.log("🚀 ~ file: authController.js:12 ~ register ~ req.body:", req.body)
@@ -88,15 +90,15 @@ export const authController = {
             await newUser.save();
             await User.createIndexes();
 
-            // const sanitizedUser = sanitizeUser(newUser);
-            // const token = generateToken(newUser);
+            const sanitizedUser = sanitizeUser(newUser);
+            const token = generateToken(newUser);
             // res.status(201).json({ user, token });
 
 
             res.status(201).json({
                 message: 'Authenticated succesfully',
-                user: sanitizeUser(newUser),
-                token: generateToken(newUser),
+                user: sanitizedUser,
+                token,
             });
         } catch (error) {
             console.log('Error during registration:', error);
@@ -117,7 +119,8 @@ export const authController = {
         }
     },
     async login(req, res, next) {
-        passport.authenticate('local', (err, user, info) => {
+        console.log(req.body);
+        passport.authenticate('local', { session: false }, (err, user, info) => {
             if (err) {
                 return next(err);
             }
@@ -127,17 +130,24 @@ export const authController = {
             }
             // If authentication is successful, manually log in the user
             // Passport adds this method to the request object
-            req.login(user, async (err) => {
+            req.login(user, { session: false }, async (err) => {
                 if (err) {
+                    console.log(err);
                     // NOTE - 500 : Internal server error 
                     return res.status(500).json({ message: 'Internal Server Error' });
+
                 }
 
                 // Send a success response with user data or a token
                 const token = generateToken(user);
+                const sanitizedUser = sanitizeUser(user);
                 console.log({ user, token });
                 // generate Token
-                return res.status(200).json({ token });
+                return res.status(200).json({
+                    message: 'Login succesful',
+                    token,
+                    user: sanitizedUser,
+                });
             });
         })(req, res, next)
     },
@@ -154,6 +164,9 @@ export const authController = {
         hanldeOAuthCallback(req, res);
     },
     async facebookCallback(req, res) {
+        hanldeOAuthCallback(req, res);
+    },
+    async githubCallback(req, res) {
         hanldeOAuthCallback(req, res);
     },
 }

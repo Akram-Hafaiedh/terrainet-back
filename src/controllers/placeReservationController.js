@@ -75,28 +75,107 @@ export const placeReservationController = {
             res.status(500).json({ message: 'Internal Server Error' });
         }
     },
-    async updateReservation(req, res) {
-        const { reservationId, placeId } = req.params;
-        const { date, startTime, userId } = req.body;
-        const endTime = calculateEndTime(startTime, 1);
-        const existingReservation = await Reservation.findOne({
-            _id: { $ne: reservationId },
-            placeId,
-            date,
-            $or: [
-                { startTime: { $gte: startTime, $lte: endTime } },
-                { endTime: { $gte: startTime, $lte: endTime } },
-            ]
-        })
-        if (existingReservation) {
-            // NOTE - 409 : Conflict
-            return res.status(409).json({ message: 'Conflict: Another reservation exists for the given time and day' });
+    async updateReservationById(req, res) {
+        try {
+            const { reservationId, placeId } = req.params;
+            const { date, startTime, userId } = req.body;
+
+            // Validate startTime format using Date object
+            const parsedStartTime = new Date(startTime);
+            if (isNaN(parsedStartTime.getTime())) {
+                return res.status(400).json({ message: 'Invalid date format for startTime.' });
+            }
+
+
+            // Calculate the endTime based on the new startTime (assuming duration is 1 hour)
+            const endTime = calculateEndTime(startTime, 1);
+            // Check for conflicts with existing reservations
+            const existingReservation = await Reservation.findOne({
+                _id: { $ne: reservationId }, // Exclude the current reservation
+                placeId,
+                date,
+                $or: [
+                    { startTime: { $gte: startTime, $lte: endTime } },
+                    { endTime: { $gte: startTime, $lte: endTime } },
+                ]
+            });
+            if (existingReservation) {
+                // NOTE - 409 : Conflict
+                return res.status(409).json({ message: 'Conflict: Another reservation exists for the given time and day' });
+            }
+
+            // Update the reservation
+            const updatedReservation = await Reservation.findByIdAndUpdate(
+                reservationId,
+                { startTime, endTime },
+                { new: true },
+            )
+            // update the user's reservation with the updated reservation document
+            await User.findByIdAndUpdate(
+                userId,
+                {
+                    $pull: { reservations: reservationId },
+                    // $push: { reservations: updatedReservation._id },
+                },
+                { new: true }
+            );
+            const updatedUser = await User.findByIdAndUpdate(
+                userId,
+                {
+                    // $pull: { reservations: reservationId },
+                    $push: { reservations: updatedReservation._id },
+                },
+                { new: true }
+            );
+            // Update the place's reservation with the updated reservation document
+            await Place.findByIdAndUpdate(
+                placeId,
+                {
+                    $pull: { reservations: reservationId },
+                    // $addToSet: { reservations: updatedReservation },
+                },
+                { new: true }
+            );
+            await Place.findByIdAndUpdate(
+                placeId,
+                {
+                    // $pull: { reservations: reservationId },
+                    $push: { reservations: updatedReservation },
+                },
+                { new: true }
+            );
+
+            res.status(200).json(updatedReservation);
+        } catch (error) {
+            console.error('Error updating reservation by ID:', error);
+            res.status(404).json({ message: 'Reservation not found', details: 'Unknown error' });
         }
-        const updatedReservation = await Reservation.findByIdAndUpdate(
-            reservationId,
-            { startTime, endTime },
-            { new: true },
-        )
+    },
+    async deleteReservationById(req, res) {
+        try {
+            const reservationId = req.params.reservationId;
+            const deletedReservation = await Reservation.findByIdAndDelete(reservationId);
+            if (!deletedReservation) {
+                // NOTE - 404 Not found
+                return res.status(404).json({ message: 'Reservation not found' });
+            }
+            // Remove the reservation from the user's reservations
+            await User.findByIdAndUpdate(
+                deletedReservation.userId,
+                { $pull: { reservations: reservationId } }
+            );
+
+            // Remove the reservation from the place's reservations
+            await Place.findByIdAndUpdate(
+                deletedReservation.placeId,
+                { $pull: { reservations: reservationId } }
+            );
+            // Respond with a status of 204 (No Content) to indicate successful deletion
+            // NOTE - 204 : No content
+            res.status(204).end()
+        } catch (error) {
+
+        }
     }
 }
 

@@ -1,3 +1,5 @@
+
+
 export const checkUserRole = (allowRoles) => (req, res, next) => {
     //Assuming user information is attached to the request
     const { roles } = req.user
@@ -66,5 +68,4 @@ export const ensureAuthenticated = (req, res, next) => {
     }
     res.redirect('/login');
 };
-
 

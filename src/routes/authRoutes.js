@@ -46,4 +46,16 @@ router.get('/facebook/callback',
     authController.facebookCallback
 );
 
+// Facebook login route
+router.get('/github',
+    passport.authenticate('github', {
+        session: false
+    })
+);
+// handle the callback from Facebook
+router.get('/github/callback',
+    passport.authenticate('github', { session: false }),
+    authController.githubCallback
+);
+
 export default router;
