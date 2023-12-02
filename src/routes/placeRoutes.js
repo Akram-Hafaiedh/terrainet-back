@@ -1,5 +1,5 @@
 import express from 'express';
-import { placeController } from '../controllers/placeController.js';
+import { placeController, placeUserController } from '../controllers/placeController.js';
 import placeReservationController from './placeReservationRoutes.js'
 import { authenticateUser } from '../middlewares/authenticateToken.js';
 
@@ -20,7 +20,8 @@ router.delete('/:placeId', placeController.deletePlaceById);
 
 // Include user reservation routes for a specific place
 router.use('/:placeId/reservations', placeReservationController)
-
+//! TODO
+router.get('/:placeId/users-with-reservations', placeUserController.getUsersWithReservations)
 
 router.put('/:placeId/update-location', placeController.updatePlaceLocationById)
 

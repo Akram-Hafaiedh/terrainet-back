@@ -23,11 +23,11 @@
 [ ] the general user would have acces to see places, make reservations and modify his own profile and his own reservation
 [ ] the moderator user is a user who can manage the place. he would see all the reservations of that place and the users related to them
 [ ] an admin user can manage have all acces, manage users, manages places, manage reservations
-
-## Next
-
-[ ] we could introduce online payment
 [ ] we could introduce the concept of tournaments
 [ ] we could also introduce the stats,  in the profile
 [ ] we could also show the result of the match with the score
 [ ] we could add a ladder page with ranks (wins-losses)
+
+## Next
+
+[ ] we could introduce online payment

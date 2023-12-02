@@ -17,10 +17,10 @@ export const profileController = {
     // get all profiles
     async getProfiles(req, res) {
         try {
-            const places = await Profile.find()
+            const profiles = await Profile.find()
             //NOTE - 200 : OK
             //NOTE - methods: [GET,PUT,POST,HEAD, TRACE]
-            res.status(200).json(places);
+            res.status(200).json(profiles);
         } catch (error) {
             // NOTE - 500 : Internal Server Error
             res.status(500).json({ message: error.message })
@@ -29,10 +29,10 @@ export const profileController = {
     // get one profile by id
     async getProfileById(req, res) {
         try {
-            const place = await Profile.findById(req.params.profileId);
+            const profile = await Profile.findById(req.params.profileId);
             //NOTE - 200 : OK
             //NOTE - methods: [GET,PUT,POST,HEAD, TRACE]
-            res.status(200).json(place);
+            res.status(200).json(profile);
         } catch (error) {
             //NOTE - 404 : Not Found , not found ressource
             // res.status(404).json({ message: error.message });
@@ -43,7 +43,7 @@ export const profileController = {
     async updateProfileById(req, res) {
         try {
             const updatedProfile = await Profile.findByIdAndUpdate(
-                req.params.id, 
+                req.params.id,
                 req.body,
                 { new: true }
             )

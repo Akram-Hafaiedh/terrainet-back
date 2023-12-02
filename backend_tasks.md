@@ -7,10 +7,19 @@
 [x] Integrate Google authentication
 [x] Integrate Facebook authentication\
 [ ] Integrate Github authentication\
+[ ] Fix User Token redirection to googleAuthentication\
+[ ] Implement Password Change\
+
+## User related tasks
+
+[ ] Implement User favorite Places\
+[ ] Implement Uer reservations History\
+[ ] Role Base Content\
+[ ] Send Message or participate to Chat\
 
 ## Place Management
 
-[ ] Create endpoint to retreive diffrent types of places\
+[x] Create endpoint to retreive diffrent types of places\
 [x] Create endpoint to retreive a list of places based on the selected type\
 [x] Create endpoint to retreive details for a single place\
 [ ] Implement reservation endpoint\

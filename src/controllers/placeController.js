@@ -182,3 +182,11 @@ export const placeController = {
     }
 }
 
+
+//! TODO
+export const placeUserController = {
+    async getUsersWithReservations(req, res) {
+        console.log('get users with reservations');
+    }
+
+}

@@ -1,14 +1,18 @@
 import mongoose from "mongoose";
 
 const locationSchema = new mongoose.Schema({
-    type: {
-        type: String,
-        enum: ['Point'],
-        default: 'Point',
-    },
+    name: { type: String, required: true },
+    adress: { type: String, required: true },
     coordinates: {
-        type: [Number], // array of numbers
-        retquired: true
+        type: {
+            type: String,
+            enum: ['Point'],
+            default: 'Point',
+        },
+        coordinates: {
+            type: [Number], // array of numbers
+            retquired: true
+        }
     }
 })
 
@@ -18,7 +22,7 @@ const locationSchema = new mongoose.Schema({
 //     "coordinates": [longitude, latitude]
 // }
 
-locationSchema.index({ coordinates: '2dsphere' }); 
+locationSchema.index({ coordinates: '2dsphere' });
 
 const Location = mongoose.model('Location', locationSchema)
 

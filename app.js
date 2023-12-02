@@ -6,7 +6,8 @@ import placeRouter from './src/routes/placeRoutes.js';
 import profileRouter from './src/routes/profileRoutes.js';
 import userRouter from './src/routes/userRoutes.js';
 import authRouter from './src/routes/authRoutes.js';
-import reservationRouter from './src/routes/reservationRoutes.js'
+import reservationRouter from './src/routes/reservationRoutes.js';
+import eventRouter from './src/routes/eventRoutes.js';
 
 import passport from './src/config/passport.js';
 import morgan from 'morgan';
@@ -45,6 +46,7 @@ app.use('/users', userRouter);
 app.use('/places', placeRouter);
 app.use('/reservations', reservationRouter);
 app.use('/profiles', profileRouter);
+app.use('/events', eventRouter);
 
 
 app.use('/auth', authRouter);

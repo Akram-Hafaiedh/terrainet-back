@@ -210,7 +210,19 @@ export const reservationController = {
         }
     },
 }
-
+//! TODO
+export const reservationUserController = {
+    // get reservations for a specific user
+    async getUserReservations(req, res) {
+        console.log('Get Reservations for a specific user');
+    }
+}
+//! TODO
+export const reservationPlaceController = {
+    async getPlaceReservations(req, res) {
+        console.log('Get Place reservations')
+    }
+}
 
 
 

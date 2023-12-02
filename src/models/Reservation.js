@@ -3,11 +3,11 @@ import Place from "./Place.js";
 
 const reservationSchema = new mongoose.Schema({
     // _id: { type: Schema.Types.ObjectId },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     placeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Place', required: true },
     date: { type: Date, required: true },
-    startTime: { type: Date, required: true },
-    endTime: { type: Date, required: true },
+    time: { type: String, required: true },
+    // endTime: { type: Date, required: true },
 }, { timestamps: true })
 
 reservationSchema.pre('save', async function (next) {
@@ -21,7 +21,7 @@ reservationSchema.pre('save', async function (next) {
 
         );
         // You might want to handle other logic here if needed
-
+        console.log('Updated Place - Reservation Pre-save middleware:', updatedPlace);
         next(); // Continue with the reservation save
     } catch (error) {
         next(error); // Pass any error to the next middleware

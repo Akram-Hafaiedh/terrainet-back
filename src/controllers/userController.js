@@ -1,3 +1,4 @@
+import Profile from "../models/Profile.js";
 import User from "../models/User.js"
 
 export const sanitizeUser = (user) => {
@@ -117,16 +118,92 @@ export const userController = {
             res.status(404).json({ message: error.message })
         }
     },
+    //! TODO
+    // change password
+    async changeUserPassword(req, res) {
+        console.log('Change password');
+    },
     // Delete a user by ID
     async deleteUserById(req, res) {
         try {
+            const userId = req.params.userId;
+            const user = await User.findById(userId);
+            const profile = await Profile.findOne({ user: userId });
+
+            if (!user || !profile) {
+
+            }
             await User.findByIdAndDelete(req.params.id);
             res.status(204).end();
         } catch (error) {
             // res.status(404).json({ message: error.message })
             res.status(404).json({ message: 'User not found' })
         }
+    },
+    // get user profile by user ID
+    async getUserProfile(req, res) {
+        try {
+            const userId = req.params.userId;
+            // Find the user profile
+            const profile = await Profile.findOne({ user: userId });
+            if (!profile) {
+                return res.status(404).json({ message: 'Pofile not found for this user' })
+            }
+            res.status(200).json(profile);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: error.message })
+        }
+        // res.status(200).json({ message: 'get user profile' })
+    },
+    //update user profile by userID
+    async updateUserProfile(req, res) {
+        try {
+            const userId = req.params.userId;
+            // find the user profile
+            const profile = await Profile.findOne({ user: userId });
+            if (!profile) {
+                return res.status(404).json({ message: 'Pofile not found for this user' });
+            }
+            const updatedProfile = await Profile.findByIdAndUpdate(
+                { user: userId },
+                req.body,
+                { new: true }
+            );
+
+            res.status(200).json(updatedProfile);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+        // res.status(200).json({ message: 'update user profile' })
+    },
+    async deleteUserProfile(req, res) {
+        try {
+            const userId = req.params.userId;
+            // find and delete the user profile
+            const deletedProfile = await Profile.findOneAndDelete({ user: userId });
+            if (!deletedProfile) {
+                return res.status(404).json({ message: 'Profile not found for this user' });
+            }
+            // NOTE - 204 : No Content , no content to send for this request
+            res.status(204).end()
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+        res.status(200).json({ message: 'delete user profile' })
     }
+}
+//! TODO
+export const userPlaceController = {
+    async getUserfavoritePlaces(req, res) {
+        console.log('Favorite places for a user')
+    },
+    async addUserFavoritePlace(req, res) {
+        console.log('add to favorites');
+    },
+    async deleteUserFavorite(req, res) {
+        console.log('delete from favorites');
+    },
 }
 
 // relationship One-to-Many ( User  - Reservation )
@@ -196,3 +273,9 @@ export const userReservationController = {
     }
 }
 
+//! TODO
+export const userEventController = {
+    async participateToEvent(req, res) {
+        console.log('join an event');
+    }
+}
