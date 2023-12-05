@@ -1,11 +1,22 @@
 import express from 'express';
+import multer from 'multer';
 
-import { userController, userEventController, userPlaceController } from '../controllers/userController.js';
+import { userController, userEventController, userPlaceController, userProfileController } from '../controllers/userController.js';
 import { userReservationController } from '../controllers/userController.js';
 import { checkUserRole } from '../middlewares/auth.js';
 
 const router = express.Router();
+const storage = multer.diskStorage({
+    destination: 'uploads/',
+    filename: (req, file, cb) => {
+        const { userId } = req.params;
+        const filename = `${userId}-${file.originalname}`;
+        cb(null, filename);
+    },
+});
 
+
+const upload = multer({ storage });
 //! ADD MIDDLEWARE FOR MANAGEMENT
 
 // Routes for user management
@@ -22,9 +33,12 @@ router.put('/:userId/changePassword', userController.changeUserPassword);
 
 
 //Routes for profiles
-router.get('/:userId/profile', userController.getUserProfile);
-router.put('/:userId/profile', userController.updateUserProfile);
-router.delete('/:userId/profile', userController.deleteUserProfile);
+router.get('/:userId/profile', userProfileController.getUserProfile);
+router.put('/:userId/profile', userProfileController.updateUserProfile);
+router.put('/:userId/profile/cover-photo', upload.single('coverPhoto'), userProfileController.updateCoverPhoto);
+router.put('/:userId/profile/profile-picture', upload.single('profilePictureUrl'), userProfileController.updateProfilePicture);
+// router.put('/:userId/profile/cover-photo', upload.single('profilePictureUrl'), userProfileController.updateProfilePhoto);
+router.delete('/:userId/profile', userProfileController.deleteUserProfile);
 
 
 // Routes for reservations

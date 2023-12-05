@@ -4,6 +4,7 @@ import { sanitizeUser } from "./userController.js";
 import passport from '../config/passport.js';
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
+import Profile from "../models/Profile.js";
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 
@@ -63,16 +64,20 @@ export const authController = {
     async register(req, res) {
         console.log(req.body);
         try {
-            const { email, password, username, passwordConfirmation } = req.body;
+            const { email, password, username, passwordConfirmation, firstName, lastName } = req.body;
             console.log("🚀 ~ file: authController.js:12 ~ register ~ req.body:", req.body)
-
+            // Validate the request body
             if (!password || !passwordConfirmation) {
                 // NOTE - 400 : Bad request
-                return res.status(400).json({ message: 'Password and password-confirmation are required' });
+                return res.status(400).json({ message: 'Password and Password-confirmation are required' });
             }
             if (password !== passwordConfirmation) {
                 // NOTE - 400 : Bad request
                 return res.status(400).json({ message: 'Passwords must match' });
+            }
+            if (!firstName || !lastName) {
+                // NOTE - 400 : Bad request
+                return res.status(400).json({ messsage: 'First name and last name are required' });
             }
 
             const existingUser = await User.findOne({ email });
@@ -82,24 +87,38 @@ export const authController = {
                 return res.status(400).json({ message: 'Email aready exists' });
             }
 
-            const newUser = new User({
+            const newUser = await User.create({
                 email,
                 password,
                 username
+            })
+
+            const newProfile = await Profile.create({
+                user: newUser._id,
+                firstName,
+                lastName
             });
+
+            // Link the profile to the user
+            newUser.profileId = newProfile._id;
             await newUser.save();
             await User.createIndexes();
 
-            const sanitizedUser = sanitizeUser(newUser);
+            // Generate a token for authentication
             const token = generateToken(newUser);
+
+            const sanitizedUser = sanitizeUser(newUser);
             // res.status(201).json({ user, token });
 
-
+            // Respond with success
             res.status(201).json({
                 message: 'Authenticated succesfully',
                 user: sanitizedUser,
                 token,
             });
+
+            // Ensure that any pending indexes are created
+            await User.createIndexes();
         } catch (error) {
             console.log('Error during registration:', error);
             // res.status(400).json({ message: error.message })
@@ -141,7 +160,7 @@ export const authController = {
                 // Send a success response with user data or a token
                 const token = generateToken(user);
                 const sanitizedUser = sanitizeUser(user);
-                console.log({ user, token });
+                // console.log({ user, token });
                 // generate Token
                 return res.status(200).json({
                     message: 'Login succesful',

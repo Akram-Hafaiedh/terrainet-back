@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 
 const profileSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, required: true }, // Reference to User, One-to-One
-    fullName: { type: String },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
     bio: { type: String, default: 'This user hasn\'t added a bio yet' },
     profilePictureUrl: { type: String },
     coverPhoto: { type: String },

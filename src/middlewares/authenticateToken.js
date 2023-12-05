@@ -38,7 +38,7 @@ export const authenticateJWT = (req, res, next) => {
 export const authenticateUser = (req, res, next) => {
     // Check for JWT token
     const token = req.headers.authorization?.split(' ')[1];
-    console.log('Received Token:', token);
+    // console.log('Received Token:', token);
 
     if (token) {
         // JWT authentication

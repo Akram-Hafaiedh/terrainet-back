@@ -16,6 +16,8 @@
 [ ] Implement Uer reservations History\
 [ ] Role Base Content\
 [ ] Send Message or participate to Chat\
+[ ] Update Profile\
+[ ] Soft Delete\
 
 ## Place Management
 

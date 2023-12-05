@@ -5,6 +5,7 @@ import { reservationController, reservationPlaceController, reservationUserContr
 // mergeParams allows access to parent router's params
 const router = express.Router({ mergeParams: true });
 
+
 // NOTE - CRUD : CREATE, READ , UPDATE: PUT , DELETE
 
 router.post('/', reservationController.createReservation);

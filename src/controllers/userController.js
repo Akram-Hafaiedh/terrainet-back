@@ -1,5 +1,6 @@
 import Profile from "../models/Profile.js";
 import User from "../models/User.js"
+// import mongoose from 'mongoose';
 
 export const sanitizeUser = (user) => {
     const { _id, password, createdAt, updatedAt, __v, ...sanitizedUser } = user.toObject();
@@ -140,58 +141,7 @@ export const userController = {
             res.status(404).json({ message: 'User not found' })
         }
     },
-    // get user profile by user ID
-    async getUserProfile(req, res) {
-        try {
-            const userId = req.params.userId;
-            // Find the user profile
-            const profile = await Profile.findOne({ user: userId });
-            if (!profile) {
-                return res.status(404).json({ message: 'Pofile not found for this user' })
-            }
-            res.status(200).json(profile);
-        } catch (error) {
-            console.log(error);
-            res.status(500).json({ message: error.message })
-        }
-        // res.status(200).json({ message: 'get user profile' })
-    },
-    //update user profile by userID
-    async updateUserProfile(req, res) {
-        try {
-            const userId = req.params.userId;
-            // find the user profile
-            const profile = await Profile.findOne({ user: userId });
-            if (!profile) {
-                return res.status(404).json({ message: 'Pofile not found for this user' });
-            }
-            const updatedProfile = await Profile.findByIdAndUpdate(
-                { user: userId },
-                req.body,
-                { new: true }
-            );
 
-            res.status(200).json(updatedProfile);
-        } catch (error) {
-            res.status(500).json({ message: error.message });
-        }
-        // res.status(200).json({ message: 'update user profile' })
-    },
-    async deleteUserProfile(req, res) {
-        try {
-            const userId = req.params.userId;
-            // find and delete the user profile
-            const deletedProfile = await Profile.findOneAndDelete({ user: userId });
-            if (!deletedProfile) {
-                return res.status(404).json({ message: 'Profile not found for this user' });
-            }
-            // NOTE - 204 : No Content , no content to send for this request
-            res.status(204).end()
-        } catch (error) {
-            res.status(500).json({ message: error.message });
-        }
-        res.status(200).json({ message: 'delete user profile' })
-    }
 }
 //! TODO
 export const userPlaceController = {
@@ -270,6 +220,143 @@ export const userReservationController = {
             res.status(500).json({ message: 'Internal Server Error' });
             console.log(error);
         }
+    }
+}
+export const userProfileController = {
+    // get user profile by user ID
+    async getUserProfile(req, res) {
+        try {
+            const userId = req.params.userId;
+            // Find the user profile
+            const profile = await Profile.findOne({ user: userId });
+            if (!profile) {
+                return res.status(404).json({ message: 'Pofile not found for this user' })
+            }
+            res.status(200).json(profile);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: error.message })
+        }
+        // res.status(200).json({ message: 'get user profile' })
+    },
+    //update user profile by userID
+    async updateUserProfile(req, res) {
+        try {
+            const userId = req.params.userId;
+            // const userId = new mongoose.Types.ObjectId(req.params.userId)
+            const updatedProfileData = req.body;
+
+            //! TODO Validate incoming data
+            //! TODO Verify that the authenticated user is the owner of the profile
+            // if (userId !== req.authenticatedUserId) {
+            //     return res.status(403).json({ error: 'Unauthorized: You do not have permission to update this profile.' });
+            // }
+
+
+            // find the user profile
+            const existingProfile = await Profile.findOne({ _id: userId });
+            if (!existingProfile) {
+                return res.status(404).json({ message: 'Pofile not found for this user' });
+            }
+            const updatedProfile = await Profile.findOneAndUpdate(
+                { _id: userId },
+                { $set: updatedProfileData },
+                { new: true }
+            );
+            if (!updatedProfile) {
+                return res.status(404).json({ error: 'User profile not found' });
+            }
+            res.status(200).json({ message: 'profile updated successfully', updatedProfile });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: error.message });
+        }
+        // res.status(200).json({ message: 'update user profile' })
+    },
+    async updateProfilePicture(req, res) {
+        try {
+            const userId = req.params.userId;
+            console.log("🚀 ~ file: userController.js:279 ~ updateCoverPhoto ~ userId:", userId)
+            const uploadedFile = req.file;
+            console.log("🚀 ~ file: userController.js:280 ~ updateCoverPhoto ~ uploadedFile:", uploadedFile)
+
+            if (!uploadedFile) {
+                return res.status(400).json({ error: 'No file selected for upload' });
+            }
+            const existingProfile = await Profile.findOne({ user: userId });
+            // NOTE - .toObject => (Mongoose document -> js object)
+
+            console.log("🚀 ~ existingProfile:", existingProfile);
+            if (!existingProfile) {
+                return res.status(404).json({ message: 'User profile not found' });
+            }
+
+            const updatedProfile = await Profile.findOneAndUpdate(
+                { user: userId },
+                { $set: { profilePictureUrl: uploadedFile.filename } },
+                // updatedQuery,
+                { new: true }
+            );
+
+            console.log("🚀 ~ updatedProfile:", updatedProfile.toObject());
+            if (!updatedProfile) {
+                return res.status(404).json({ error: 'User profile not found' });
+            }
+            res.status(200).json({ message: `profile picture updated sucessfully`, updatedProfile });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: error.message })
+        }
+    },
+    async updateCoverPhoto(req, res) {
+        console.log('Route called');
+        try {
+            const userId = req.params.userId;
+            console.log("🚀 ~ file: userController.js:279 ~ updateCoverPhoto ~ userId:", userId)
+            const uploadedFile = req.file;
+            console.log("🚀 ~ file: userController.js:280 ~ updateCoverPhoto ~ uploadedFile:", uploadedFile)
+
+            if (!uploadedFile) {
+                return res.status(400).json({ error: 'No file selected for upload' });
+            }
+
+            const existingProfile = await Profile.findOne({ user: userId });
+            // NOTE - .toObject => (Mongoose document -> js object)
+            console.log("🚀 ~ existingProfile:", existingProfile);
+            if (!existingProfile) {
+                return res.status(404).json({ message: 'User profile not found' });
+            }
+
+            const updatedProfile = await Profile.findOneAndUpdate(
+                { user: userId },
+                { $set: { coverPhoto: uploadedFile.filename } },
+                { new: true }
+            );
+
+            console.log("🚀 ~ updatedProfile:", updatedProfile.toObject());
+            if (!updatedProfile) {
+                return res.status(404).json({ error: 'User profile not found' });
+            }
+
+            res.status(200).json({ message: 'Cover photo uploaded successfully', updatedProfile });
+        } catch (error) {
+            res.status(500).json({ message: error.message })
+        }
+    },
+    async deleteUserProfile(req, res) {
+        try {
+            const userId = req.params.userId;
+            // find and delete the user profile
+            const deletedProfile = await Profile.findOneAndDelete({ user: userId });
+            if (!deletedProfile) {
+                return res.status(404).json({ message: 'Profile not found for this user' });
+            }
+            // NOTE - 204 : No Content , no content to send for this request
+            res.status(204).end()
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+        res.status(200).json({ message: 'delete user profile' })
     }
 }
 

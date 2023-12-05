@@ -1,6 +1,7 @@
 import express from 'express';
 import 'dotenv/config'
 import mongoose from 'mongoose';
+import multer from 'multer'
 
 import placeRouter from './src/routes/placeRoutes.js';
 import profileRouter from './src/routes/profileRoutes.js';
@@ -10,7 +11,6 @@ import reservationRouter from './src/routes/reservationRoutes.js';
 import eventRouter from './src/routes/eventRoutes.js';
 
 import passport from './src/config/passport.js';
-import morgan from 'morgan';
 
 
 const PORT = process.env.PORT || 3001
@@ -18,9 +18,10 @@ const PORT = process.env.PORT || 3001
 const app = express()
 
 // Middleware
-app.use(morgan('combined'))
 app.use(express.json());
 app.use(passport.initialize());
+// Serve the "uploads" directory as a static directory
+app.use('/uploads', express.static('uploads'));
 
 // Connect to the database
 mongoose.connect(process.env.MONGODB_URI)

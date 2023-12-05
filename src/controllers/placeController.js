@@ -49,9 +49,9 @@ export const placeController = {
                 populate('reservations').
                 populate({ path: 'location', select: '-__v ' });
             // populate({ path: 'location', select: '-__v -_id' });
-            console.log('Before:', places);
+            // console.log('Before:', places);
             const sanitizedPlaces = places.map(place => sanitizePlace(place))
-            console.log('After:', sanitizedPlaces);
+            // console.log('After:', sanitizedPlaces);
             res.status(200).json(sanitizedPlaces);
         } catch (error) {
             res.status(500).json({ message: error.message });

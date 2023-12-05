@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
         },
     ],
     teams: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }],
-    roles: [{ type: String, enum: ['user', 'admin', 'moderator', 'guest'], default: 'user' }],
+    roles: [{ type: String, enum: ['user', 'admin', 'moderator', 'guest'], default: ['user'] }],
     isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 
@@ -39,8 +39,7 @@ userSchema.pre('save', async function (next) {
     } catch (error) {
         next(error);
     }
-
-})
+});
 
 
 const User = mongoose.model('User', userSchema);
