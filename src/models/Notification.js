@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const notificationSchema = mongoose.Schema({
 
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    type: { type: String, required: true },
+    type: { type: mongoose.Schema.Types.ObjectId, red: 'NotificationType' },
     message: { type: String, required: true },
     isRead: { type: Boolean, default: false },
     expirationDate: { type: Date, required: true },

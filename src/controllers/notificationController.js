@@ -1,4 +1,6 @@
 import Notification from '../models/Notification.js'
+import NotificationType from '../models/NotificationType.js';
+import mongoose from 'mongoose';
 
 export const notificationController = {
     //! TODO Autorization and access control
@@ -14,12 +16,25 @@ export const notificationController = {
             return res.status(400).json({ message: 'Invalid notification message' });
         }
         try {
+            const notificationType = await NotificationType.findOne({ type });
+
+            if (!notificationType) {
+                return res.status(400).json({ message: 'Invalid notification type' });
+            }
             const newNotification = new Notification({
                 type,
                 message,
             });
+            await newNotification.save();
+            const usersWithPreferences = await User.find(
+                { 'notificationPreferences.type': type, 'notificationPreferences.isEnabled': true }
+            );
+            usersWithPreferences.forEach(async (user) => {
+                // Add the notification to the user's list
+                user.notifications.push(newNotification._id);
+                await user.save();
+            });
 
-            await newNotification.save()
             res.status(201).json({ message: 'Notification created successfully' });
         } catch (error) {
             console.error(error);
@@ -76,11 +91,16 @@ export const notificationController = {
         // /notifications/filter?type=someType
         // Validate the filter criteria
         const allowedFilters = {
-            type: {
+            notificationTypeId: {
                 required: true,
-                type: String,
-                minLength: 3,
-                maxLength: 50,
+                type: mongoose.Types.ObjectId,
+            },
+
+            isRead: {
+                type: Boolean,
+            },
+            createdAt: {
+                type: Date,
             },
         };
 
@@ -102,8 +122,15 @@ export const notificationController = {
         if (!type) {
             return res.status(400).json({ message: 'Missing filter criteria' });
         }
+        // Construct the filter object based on the allowed filters
+        const filterObject = {};
+        for (const filter in allowedFilters) {
+            if (req.query[filter]) {
+                filterObject[filter] = req.query[filter];
+            }
+        }
         try {
-            const filteredNotifications = await Notification.find({ type });
+            const filteredNotifications = await Notification.find(filterObject);
             res.status(200).json({ notifications: filteredNotifications });
         } catch (error) {
             console.log(error);
@@ -128,7 +155,7 @@ export const notificationController = {
     //     }
     // }
     // ,
-    
+
     // Automatically remove notifications that have expired or are no longer relevant.
     async deleteExpiredNotifications(req, res) {
         try {

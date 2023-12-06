@@ -1,4 +1,5 @@
 import Notification from '../models/Notification.js'
+import NotificationType from '../models/NotificationType.js';
 import User from '../models/User.js'
 
 export const userNotificationController = {
@@ -26,12 +27,86 @@ export const userNotificationController = {
             res.status(statusCode).json(message);
         }
     },
+    // Unsubscribe a user from a specific notification type
+    async unsubscribeUserFromNotificationType(req, res) {
+        const { userId, notificationTypeId } = req.params;
+        if (!userId) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
+        if (!isValidObjectId) {
+            return res.status(400).json({ error: 'Invalid userId format' });
+        }
+        if (!userId || !notificationTypeId) {
+            return res.status(404).json({ message: 'type is missing' });
+        }
+        try {
+            const notificationType = await NotificationType.findById(notificationTypeId);
+            if (!notificationType) {
+                return res.status(404).json({ message: 'Notification type not found' });
+            }
+            const updatedUser = await User.findByIdAndUpdate(
+                userId,
+                { $pull: { notificationPreferences: { type: notificationTypeId } } },
+                { new: true } // Return the modified user document
+            );
+            if (!updatedUser) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            res.status(200).json({ message: `User unsubscribed from ${notificationType} successfully` });
+        } catch (error) {
+            console.log(error);
+            const statusCode = error.statusCode || 500;
+            const message = error.message || 'An unknown error occurred when unsubscribing to notitication type';
+            res.status(statusCode).json(message);
+        }
+    },
+    // Subscribe a user to a specific notification type
+    async subscribeUserToNotificationType(req, res) {
+        const { userId, notificationTypeId } = req.params;
+        if (!userId) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
+        if (!isValidObjectId) {
+            return res.status(400).json({ error: 'Invalid userId format' });
+        }
+        if (!userId || !notificationTypeId) {
+            return res.status(404).json({ message: 'type is missing' });
+        }
+        try {
+            // Check if the notification type exists
+            const notificationType = await NotificationType.findById(notificationTypeId);
+            if (!notificationType) {
+                return res.status(404).json({ message: 'Notification type not found' });
+            };
+            const updatedUser = await User.findByIdAndUpdate(
+                userId,
+                { $addToSet: { notificationPreferences: { type: notificationTypeId, isEnabled: true } } },
+                { new: true } // Return the modified user document
+            );
 
+            if (!updatedUser) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            res.status(200).json({ message: `User subscribed to ${notificationType} successfully` });
+
+        } catch (error) {
+            console.log(error);
+            const statusCode = error.statusCode || 500;
+            const message = error.message || 'An unknown error occurred when subscribing to notitication type';
+            res.status(statusCode).json(message);
+        }
+    },
     // Subscribe a user to a notification
     async subscribeUserToNotification(req, res) {
 
         const { userId, notificationId } = req.params;
+        const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
 
+        if (!isValidObjectId) {
+            return res.status(400).json({ error: 'Invalid userId format' });
+        }
         if (!userId || !notificationId) {
             return res.status(404).json({ message: 'User or notification not found' });
         }
@@ -49,7 +124,7 @@ export const userNotificationController = {
             res.status(200).json({ message: 'User subscribed to notification successfully' });
         } catch (error) {
             const statusCode = error.statusCode || 500;
-            const message = error.message || 'An unknown error occurred when subscribingnotitication';
+            const message = error.message || 'An unknown error occurred when subscribing to notitication';
             res.status(statusCode).json(message);
         }
     },
@@ -80,7 +155,7 @@ export const userNotificationController = {
     }
     ,
     // Mark a notification as read for a specific user
-    async markNotificationAsRead(req, res) {
+    async markNotificationAsReadForUser(req, res) {
         const notificationId = req.params.notificationId;
 
         try {
@@ -103,7 +178,7 @@ export const userNotificationController = {
     async markAllNotificationsAsRead(req, res) {
         const userId = req.params.userId;
         const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
-        
+
         if (!isValidObjectId) {
             return res.status(400).json({ error: 'Invalid userId format' });
         }

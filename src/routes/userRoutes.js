@@ -20,17 +20,23 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 //! ADD MIDDLEWARE FOR MANAGEMENT
 
-// Routes related to to notifcations:
+//SECTION Routes related to to notifcations:
+router.get('/:userId/notifications', userNotificationController.getNotificationsForUser);
+router.put('/:userId/notifications/mark-all-read', userNotificationController.markNotificationAsReadForUser);
+router.put('/:userId/notifications/:notificationId/mark-read', userNotificationController.markNotificationAsReadForUser);
+router.put('/:userId/notifications/:notificationId/unsubscribe', userNotificationController.unsubscribeUserFromNotification);
+router.put('/:userId/notifications/:notificationId/subscribe', userNotificationController.subscribeUserToNotification);
+// router.put('/:userId/notifications/unsubscribe/:notificationType', userNotificationController.unsubscribeUserFromNotification);
+// router.put('/:userId/notifications/subscribe/:notificationType', userNotificationController.subscribeUserToNotification);
 
-
-// Routes for user management
+//SECTION Routes for users:
 router.post('/', userController.createUser);
+router.post('/multiple-users', userController.createMultipleusers);
 router.get('/', userController.getUsers);
 router.get('/:userId', userController.getUserById);
 router.put('/:userId', userController.updateUserById);
 router.delete('/:userId', userController.deleteUserById);
 
-router.post('/multiple-users', userController.createMultipleusers);
 
 //! TODO
 router.put('/:userId/changePassword', userController.changeUserPassword);

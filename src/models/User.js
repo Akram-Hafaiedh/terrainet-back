@@ -7,6 +7,11 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },
     profileId: { type: mongoose.Schema.Types.ObjectId, ref: 'Profile' }, // Reference to Profile, One-to-One
     reservations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reservation' }], // Array of Reservation Reference: One-To-Many
+    notifications: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Notification' }], //Array of notifcations.
+    notificationPreferences: [{
+        type: { type: mongoose.Schema.Types.ObjectId, ref: 'NotificationType', required: true },
+        isEnabled: { type: Boolean, default: true }
+    }],
     matchmakingPreferences: {
         nearby: { type: Boolean, default: true },
         location: { type: mongoose.Schema.Types.ObjectId, ref: 'Location' },
