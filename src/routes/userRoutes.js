@@ -4,6 +4,7 @@ import multer from 'multer';
 import { userController, userEventController, userPlaceController, userProfileController } from '../controllers/userController.js';
 import { userReservationController } from '../controllers/userController.js';
 import { checkUserRole } from '../middlewares/auth.js';
+import { userNotificationController } from '../controllers/userNotificationController.js';
 
 const router = express.Router();
 const storage = multer.diskStorage({
@@ -18,6 +19,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 //! ADD MIDDLEWARE FOR MANAGEMENT
+
+// Routes related to to notifcations:
+
 
 // Routes for user management
 router.post('/', userController.createUser);
@@ -52,6 +56,5 @@ router.delete('/:userId/favorites/:placeId', userPlaceController.deleteUserFavor
 
 // Routes for events
 router.get('/:userId/events/:eventsId/participate', userEventController.participateToEvent)
-
 
 export default router;

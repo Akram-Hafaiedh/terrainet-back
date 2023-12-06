@@ -19,7 +19,7 @@ router.put('/:placeId', placeController.updatePlaceById);
 router.delete('/:placeId', placeController.deletePlaceById);
 
 // Include user reservation routes for a specific place
-router.use('/:placeId/reservations', placeReservationController)
+router.use('/:placeId/reservations', placeReservationController);
 //! TODO
 router.get('/:placeId/users-with-reservations', placeUserController.getUsersWithReservations)
 

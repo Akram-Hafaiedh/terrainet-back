@@ -3,10 +3,16 @@ import mongoose from 'mongoose';
 const notificationSchema = mongoose.Schema({
 
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    content: { type: String },
-    timestamp: { type: Date, default: Date.now },
+    type: { type: String, required: true },
+    message: { type: String, required: true },
+    isRead: { type: Boolean, default: false },
+    expirationDate: { type: Date, required: true },
+    createdAt: { type: Date, default: Date.now },
 });
+// we are frequently sorting by createdAt
+notificationSchema.index({ createdAt: -1 });
+notificationSchema.index({ user: 1 });
 
-const Notificaion = mongoose.model('Notification', notificationSchema)
+const Notification = mongoose.model('Notification', notificationSchema);
 
-export default Notificaion;
+export default Notification;
